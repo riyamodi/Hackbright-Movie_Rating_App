@@ -26,12 +26,13 @@ class User(Base):
     gender = Column(String(1), nullable = True)
     occupation = Column(String(30), nullable=True)
 
+    # ratings added by Ratings backref (list of ratings for this user)
 
-class Movies(Base):
+class Movie(Base):
 
     __tablename__ = "movies"
 
-    id = Column(Integer, ForeignKey('ratings.movie_id'),primary_key = True)
+    id = Column(Integer, primary_key = True)
     movie_title = Column(String(64), nullable = True)
     release_date = Column(Integer, nullable = True)
     video_release_date = Column(Integer, nullable = True)
@@ -56,19 +57,20 @@ class Movies(Base):
     war = Column(Integer, nullable=True)
     western = Column(Integer, nullable=True)
 
-    rating = relationship("Ratings",backref=backref("movies",order_by=id))
+    rating = relationship("Rating",backref=backref("movie",order_by=id))
 
-class Ratings(Base):
+class Rating(Base):
 
     __tablename__ = "ratings"
 
     id = Column(Integer, primary_key = True)
-    movie_id = Column(Integer)
+    movie_id = Column(Integer, ForeignKey('movies.id'))
     user_id = Column(Integer, ForeignKey('users.id'))
     rating = Column(Integer)
     timestamp = Column(Integer)
 
     user = relationship("User",backref=backref("ratings",order_by=id))
+
 
 ### End class declarations
 

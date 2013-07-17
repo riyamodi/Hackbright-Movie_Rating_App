@@ -1,0 +1,12 @@
+<html>
+    <h4>{{movie}}'s Average Rating is: {{avg_rating}}</h4>
+
+    <h3>Add a rating</h3>
+    <form action="/add_rating?title={{movie}}">
+        <label for="movie_title">Enter the title of the movie</label>
+        <input type="text" name="movie_title"/><br>
+        <label for="rating">Enter your rating for {{movie}}</label>
+        <input type="text" name="rating"/><br>
+        <input type="submit">
+
+</html>

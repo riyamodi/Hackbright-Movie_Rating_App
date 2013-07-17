@@ -55,7 +55,7 @@ def load_movies(session):
         # print row[0].split('|')
 
 
-        m = model.Movies(id=movie[0],movie_title=movie[1].decode("latin-1"),release_date=movie[2],video_release_date=movie[3],imdb_url=movie[4], unknown=movie[5], action=movie[6],adventure=movie[7],
+        m = model.Movie(id=movie[0],movie_title=movie[1].decode("latin-1"),release_date=movie[2],video_release_date=movie[3],imdb_url=movie[4], unknown=movie[5], action=movie[6],adventure=movie[7],
                          animation=movie[8], childrens=movie[9], comedy=movie[10],crime=movie[11],documentary=movie[12],drama=movie[13],fantasy=movie[14],film_noir=movie[15],
                         horror=movie[16],musical=movie[17],mystery=movie[18],romance=movie[19],sci_fi=movie[20],thriller=movie[21],war=movie[22],western=movie[23])
         movies.append(m)
@@ -77,7 +77,7 @@ def load_ratings(session):
 
     for row in ratings_list_content:
         print "Row is:" , row
-        d = model.Ratings(user_id=row[0],movie_id=row[1],rating=row[2],timestamp=row[3])
+        d = model.Rating(user_id=row[0],movie_id=row[1],rating=row[2],timestamp=row[3])
         ratings.append(d)
 
     for d in ratings:
