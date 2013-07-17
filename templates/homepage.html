@@ -1,0 +1,38 @@
+<html>
+	<body style="background-color:beige">
+	<h3><a href="/user_list">List of all Users</a></h3><br>
+
+	<h3>Sign up!</h3>
+	<form action="/add_user" method="POST">
+		<label for="email">Enter your email address</label>
+		<input type="text" name="email"/><br>
+		<label for="password">Enter your password</label>
+		<input type="password" name="password"/><br>
+		<label for="zipcode">Enter your zipcode</label>
+		<input type="text" name="zipcode"/><br>
+		<label for="occupation">Enter your occupation</label>
+		<input type="text" name="occupation"/><br>
+		<label for="age">Enter your age</label>
+		<input type="text" name="age"/><br>
+		<input type="checkbox" name="gender" value="F">Female
+		<input type="checkbox" name="gender" value="M">Male
+		<input type="submit">
+	</form>
+
+	<h3>Log In!</h3>
+	<form action="/log_in" method="POST">
+		<label for="email">Enter your email address</label>
+		<input type="text" name="email"/>
+		<label for="password">Enter your password</label>
+		<input type="password" name="password"/>
+		<input type="submit">
+	</form>
+
+</body>
+
+	
+
+
+
+
+</html>
