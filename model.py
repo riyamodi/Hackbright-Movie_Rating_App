@@ -17,7 +17,6 @@ Base.query = session.query_property()
 class User(Base):
     
     __tablename__ = "users"
-    print "I'm here!"
     id = Column(Integer, primary_key = True)
     email = Column(String(64), nullable = True)
     password = Column(String(64), nullable = True)

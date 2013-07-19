@@ -10,7 +10,7 @@
     <label for="rating">Enter your rating for {{movie}}</label>
     <input type="text" name="rating"/><br>
     <input type="submit">
-    <h2>Your rated movies: </h2>
+    <h2>User {{user.id}}'s ratings are: </h2>
     {% for r in user.ratings %}
         <h4>Movie: <a href="/movie_page?title={{r.movie.movie_title}}">{{r.movie.movie_title}}</a> Rating: {{r.rating}}</h4>
 <!-- display the movies the user has rated and what the ratings were-->

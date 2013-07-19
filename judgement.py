@@ -1,14 +1,13 @@
-from flask import Flask, render_template, redirect, request, flash
+from flask import Flask, render_template, redirect, request, flash, session, g, url_for
 import model
 
 app = Flask(__name__)
 
-LOGGED_IN = False
+
 USER_ID = None 
 
 @app.route("/")
 def index():
-    print "LOGGED_IN: " , LOGGED_IN
     return render_template("homepage.html", users=user_list)
 
 @app.route("/user_list")
@@ -41,25 +40,27 @@ def log_in():
         u=model.User()
         u.email=request.form["email"]
         u.password=request.form["password"]
+        #there should be a better way of getting the id, correct?
+        the_user=model.session.query(model.User).filter_by(email=u.email).one()
+        u.id=the_user.id
+        print "USER ID IS: ", u.id
         if not (model.session.query(model.User).filter_by(email=u.email).filter_by(password=u.password).all()):
             print "Email address not registered. Check spelling or sign up."
             #find a way to display that message to the screen
             #flash(u'Email address not registered. Check spelling or Sign Up')
             return redirect("/")
         else:
-            LOGGED_IN=True
-            print "LOGGED_IN", LOGGED_IN
+            session['user_id']=u.id
             return render_template("user_page.html", user=u)
 
 @app.route("/user", methods=['GET','POST'])
 def users():
     user_id = request.args.get("id")
-    user=model.session.query(model.User).get(user_id)
+    user=model.session.query(model.User).get("user_id")
     return render_template("user_page.html",user=user)#,ratings=ratings)
 
 @app.route("/movie_page")
 def movie():
-    print "LOGGED_IN", LOGGED_IN
     movie_title = request.args.get("title")
     movie=model.session.query(model.Movie).filter_by(movie_title=movie_title).one()
 
@@ -71,24 +72,55 @@ def movie():
     avg_rating = sum_of_ratings/len(movie.rating)
     return render_template("movie_page.html", avg_rating=avg_rating,movie=movie_title)
 
+@app.before_request
+def before_request():
+    # anon_pages = ["/", "/login"]
+    user_id=session.get("user_id")
+    print "user_id in before request is: ", user_id
+    if user_id:
+        user=model.session.query(model.User).get(user_id)
+        g.user=user
+        print "g.user.id is: ", g.user.id
+    else:
+        g.user=None
+        # if request.path not in anon_pages
+        #     return redirect("/login")
+
+    #use the commented out lines of code so on other pages, like "/add_rating"
+    #I don't need to use my if and else statements because if a person is on
+    #those pages, that means they are logged in
+
+
 @app.route("/add_rating")
 def add_rating():
-    print "LOGGED_IN" , LOGGED_IN
-    if LOGGED_IN==True:
+    #user_id=session.get("user_id")
+    #print "user id w/ session is: ", user_id
+    print "g.user is:", g.user.id
+    if g.user:#user_id: 
         r=model.Rating()
-        r.movie.movie_title = request.args.get("movie_title")
+        print "R is:", r
+        r.movie_title = request.args.get("movie_title")
         r.rating = request.args.get("rating")
-        r.user.id = USER_ID
-        print "user id is: ", r.user.id
+        print "user id is: ", r.user_id
+        g.user.ratings.append(r)
         model.session.add(r)
         model.session.commit()
         return redirect("/user")
-
     else:
-        print "not logged in!!!"
-        return redirect("/")
+        print "user doesn't exist!"
+    # else:
+    # print "not logged in!!!"
+    # return redirect("/")
 
 
+@app.route("/logout")
+def logout():
+    del session['user_id']
+    return redirect(url_for("index"))
+#use a random generator to get a good secret key:
+#>>import os
+#>>os.urandom(37)
+app.secret_key="""8\x95[_L*O\x11\xb0\x96\x11DQ\xc8\xa8?B\xa4\xd4n\xed\x9c.\xb8\xfaGx\x9c\x03\xed\xdb"o\xb6"\xe6^"""
 
 if __name__ == "__main__":
     app.run(debug=True)
