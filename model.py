@@ -56,7 +56,7 @@ class Movie(Base):
     war = Column(Integer, nullable=True)
     western = Column(Integer, nullable=True)
 
-    rating = relationship("Rating",backref=backref("movie",order_by=id))
+    #rating = relationship("Rating",backref=backref("movie",order_by=id)) #get rid of this
 
 class Rating(Base):
 
@@ -68,8 +68,8 @@ class Rating(Base):
     rating = Column(Integer)
     timestamp = Column(Integer)
 
-    user = relationship("User",backref=backref("ratings",order_by=id))
-
+    user = relationship("User",backref=backref("ratings",order_by=id)) 
+    movie = relationship("Movie",backref=backref("ratings", order_by=id))
 
 ### End class declarations
 

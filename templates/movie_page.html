@@ -1,12 +1,20 @@
 <html>
-    <h4>{{movie}}'s Average Rating is: {{avg_rating}}</h4>
+    <h4>{{movie.movie_title}}'s Average Rating is: {{avg_rating}}</h4>
 
     <h3>Add a rating</h3>
     <form action="/add_rating?title={{movie}}">
         <label for="movie_title">Enter the title of the movie</label>
         <input type="text" name="movie_title"/><br>
-        <label for="rating">Enter your rating for {{movie}}</label>
+        <label for="rating">Enter your rating for {{movie.movie_title}}</label>
         <input type="text" name="rating"/><br>
         <input type="submit">
+    </form>
 
+    <h3>Update your rating for {{movie.movie_title}}</h3>
+    <form action="/update_rating">
+        <label for="new_rating">Enter your updated rating</label>
+        <input type="text" name="new_rating"/><br>
+        <input type="hidden" name="movie_id" value="{{movie.id}}">
+        <input type="submit">
+    </form>
 </html>
