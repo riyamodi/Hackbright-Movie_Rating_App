@@ -94,6 +94,7 @@ def users():
 def movie():
     movie_title = request.args.get("title")
     movie=model.session.query(model.Movie).filter_by(movie_title=movie_title).one()
+    print "movie is: ", movie
 
     sum_of_ratings = 0
 
@@ -112,10 +113,12 @@ def movie():
 
 @app.route("/add_rating")
 def add_rating():
+    print "user id is: ", g.user.id
     if g.user: 
         r=model.Rating()
         print "R is:", r
         r.movie_title = request.args.get("movie_title")
+        print "movie_title is: ", r.movie_title
         movie = model.session.query(model.Movie).filter_by(movie_title=r.movie_title).one()
         r.movie_id = movie.id
         r.rating = request.args.get("rating")
@@ -131,24 +134,68 @@ def add_rating():
 def change_rating():
     if g.user:
 
+        user=g.user
+        
+        movie_id = int(request.args.get("movie_id"))
+        print "movie id is: ", movie_id
+        
+        new_rating = request.args.get("new_rating")
+        print "the new rating is: ", new_rating
+
+        movie_title = request.args.get("title")
+        print "movie_title is: ", movie_title
+
+        users_movie_rating = model.session.query(model.Rating).filter_by(movie_id=movie_id, user_id=user.id).all()
+        print "users movie rating: ", users_movie_rating
+
+        if not users_movie_rating:
+            print "you haven't rated this movie yet"
+            return redirect("/movie_page?title=%s" % movie_title)
+
+        else:    
+            update_rating=model.session.query(model.Rating).filter_by(movie_id=movie_id, user_id=user.id).update({"rating": new_rating})
+            print "update rating is: ", update_rating
+            #model.session.add(update_rating)
+            print "added session"
+            model.session.commit()
+            return redirect("/user")
+    else:
+        print "you haven't logged in yet"
+        return redirect("/")
+        #*************************************************
+
+        # user=g.user
+        # print "user's id is: ", user.id
+        # user_rating=user.ratings #list of all the user's ratings
+        # print "list of all the user's ratings: ", user_rating
+        # movie_id = int(request.args.get("movie_id"))
+        # print "movie id is: ", movie_id
+        # for rating in user_rating:
+        #     print "rating.movie_id is: ", rating.movie_id
+        #     if rating.movie_id == movie_id:
+        #         change_me = movie_id
+        #         rating_to_change=rating.rating
+        #         break
+        #     else:
+        #         change_me = None
+        # if change_me==None:
+        #     print "You haven't rated this movie yet"
+        #     return redirect("/log_in")
+        # else: 
+        #     print "the rating I want to change is: ", rating_to_change
+        #     new_rating = request.args.get("new_rating")
+        #     print "the new rating is: ", new_rating
+
+            
+        #     return "NOW I NEED TO FIGURE OUT HOW TO CHANGE THE RATING"
+            
+        #************************************************************
+
         #get a user's id
         #get all of that user's ratings
         #get the rating that matches with the movie title
-        user=g.user
-        user_rating=user.ratings #list of all the user's ratings
-        movie_id = int(request.args.get("movie_id"))
-        for rating in user_rating:
-            if rating.movie_id == movie_id:
-                change_me = movie_id
-                rating_to_change=rating.rating
-            else:
-                change_me = None
-        if change_me==None:
-            print "You haven't rated this movie yet"
-            return redirect("/log_in")
-        else: 
-            print "the rating i want to change is: ", rating_to_change
-            return "NOW I NEED TO FIGURE OUT HOW TO CHANGE THE RATING"
+        
+
             #print "trying this: ", user.ratings.movie.rating
             # m=model.session.query(model.Movie).filter_by(id=movie_id).one()
             # print "m.user.rating is: ", user.ratings.m.rating
@@ -185,8 +232,7 @@ def change_rating():
         # print "movie is: ", movie_title
         # print "new rating is: ", new_rating
 
-    else:
-        return redirect("/")
+
 
 @app.route("/logout")
 def logout():
