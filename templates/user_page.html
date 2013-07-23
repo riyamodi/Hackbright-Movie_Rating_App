@@ -4,15 +4,16 @@
         <label for="rating">Enter your email address</label>
         <input type="text" name="email"/><br> -->
     <h2>Add a rating</h2>
-    <form action="/add_rating?title={{movie}}">
+    <form action="/add_rating">
     <label for="movie_title">Enter the title of the movie</label>
     <input type="text" name="movie_title"/><br>
-    <label for="rating">Enter your rating for {{movie}}</label>
+    <!-- <label for="rating">Enter your rating for {{movie}}</label>
     <input type="text" name="rating"/><br>
+    <input type="hidden" name="movie_id" value="{{user.ratings.movie_id}}"> -->
     <input type="submit">
     <h2>User {{user.id}}'s ratings are: </h2>
     {% for r in user.ratings %}
-        <h4>Movie: <a href="/movie_page?title={{r.movie.movie_title}}">{{r.movie.movie_title}}</a> Rating: {{r.rating}}</h4>
+        <h4>Movie: <a href="/movie_page?id={{r.movie.id}}">{{r.movie.movie_title}}</a> Rating: {{r.rating}}</h4>
 <!-- display the movies the user has rated and what the ratings were-->
     {% endfor %}
 </html>

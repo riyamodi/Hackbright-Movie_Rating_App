@@ -58,12 +58,12 @@ def log_in():
     if request.method=='POST':
         email=request.form["email"]
         password=request.form["password"]
-        #there should be a better way of getting the id, correct?
+        #should i be doing .one() bc it will throw an error if it can't find anything
         the_user=model.session.query(model.User).filter_by(email=email, password=password).one()
         if not the_user:
             print "Email address not registered. Check spelling or sign up."
             #find a way to display that message to the screen
-            #flash(u'Email address not registered. Check spelling or Sign Up')
+            #flash("Email address not registered. Check spelling or Sign Up")
             return redirect("/")
         else:
             session['user_id']=the_user.id
@@ -90,11 +90,16 @@ def users():
         #print "user is: ", user
     # return render_template("user_page.html",user=user)
 
+# @app.route("/get_movie_id")
+# def get_movie_id():
+#     movie_title=request.args.get("movie_title")
+
+
 @app.route("/movie_page")
 def movie():
-    movie_title = request.args.get("title")
-    movie=model.session.query(model.Movie).filter_by(movie_title=movie_title).one()
-    print "movie is: ", movie
+    movie_id = request.args.get("id")
+    movie=model.session.query(model.Movie).filter_by(id=movie_id).one()
+    print "movie is: ", movie.id
 
     sum_of_ratings = 0
 
@@ -111,17 +116,25 @@ def movie():
 
     return render_template("movie_page.html", avg_rating=avg_rating,movie=movie)#, user_rating=r)
 
+#should make a check so peope can't add multiple ratings for the same movie
 @app.route("/add_rating")
 def add_rating():
-    print "user id is: ", g.user.id
     if g.user: 
         r=model.Rating()
         print "R is:", r
-        r.movie_title = request.args.get("movie_title")
-        print "movie_title is: ", r.movie_title
-        movie = model.session.query(model.Movie).filter_by(movie_title=r.movie_title).one()
-        r.movie_id = movie.id
+        r.movie_id = request.args.get("movie_id")
+        print "movie_id is: ", r.movie_id
+       
+        #check to see if we got to this route by just entering the movie title
+        if r.movie_id is None:
+            r.movie_title=request.args.get("movie_title")
+            print "the movie title is: ", r.movie_title
+            movie = model.session.query(model.Movie).filter_by(movie_title=r.movie_title).one()
+            r.movie_id = movie.id
+            return render_template("movie_page.html", movie=movie, rating=r)
+
         r.rating = request.args.get("rating")
+        r.user_id=g.user.id
         print "user id is: ", r.user_id
         g.user.ratings.append(r)
         model.session.add(r)
