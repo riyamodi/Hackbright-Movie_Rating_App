@@ -10,7 +10,6 @@ USER_ID = None
 def before_request():
     # anon_pages = ["/", "/login"]
     user_id=session.get("user_id")
-    # print "user_id in before request is: ", user_id
     if user_id:
         user=model.session.query(model.User).get(user_id)
         g.user=user
@@ -90,9 +89,6 @@ def users():
         #print "user is: ", user
     # return render_template("user_page.html",user=user)
 
-# @app.route("/get_movie_id")
-# def get_movie_id():
-#     movie_title=request.args.get("movie_title")
 
 
 @app.route("/movie_page")
@@ -101,20 +97,59 @@ def movie():
     movie=model.session.query(model.Movie).filter_by(id=movie_id).one()
     print "movie is: ", movie.id
 
-    sum_of_ratings = 0
+    ratings = movie.ratings #list of all ratings for the specific movie
+    # print "list of ratings are: ", ratings
+    
+    rating_nums = []
+    user_rating = None
 
-    for i in movie.ratings:
-        sum_of_ratings += i.rating
+    for r in ratings:
+        if g.user:
+            if r.user_id == session['user_id']:
+                user_rating = r
+        rating_nums.append(r.rating)
+    avg_rating = float(sum(rating_nums))/len(rating_nums)
 
-    avg_rating = sum_of_ratings/len(movie.ratings)
+    #Prediction code: only predict if the user hasn't rated the movie yet
+    if g.user:  #can only do the following code if a user has logged in
+        user = model.session.query(model.User).get(session['user_id'])
+        prediction = None 
+        if not user_rating:
+            prediction = user.predict_rating(movie)
+            # print "prediction is: ", prediction
+            effective_rating = prediction
+        else:
+            effective_rating=user_rating.rating
 
+        the_eye= model.session.query(model.User).filter_by(email="theeye@ofjudgement.com").one()
+        eye_rating = model.session.query(model.Rating).filter_by(user_id=the_eye.id, movie_id=movie.id).first()
+
+        if not eye_rating:
+            eye_rating = the_eye.predict_rating(movie)
+        else:
+            eye_rating = eye_rating.rating
+
+        difference = abs(eye_rating - effective_rating)
+
+        messages = ["I suppose you don't have the worst taste possible.",
+                    "Not the worst opinion but not the best.",
+                    "You need to reevaluate your tastes and/or personality.", 
+                    "I regret every decision that I've made to listen to your opinion."]
+
+        beratement = messages[int(difference)]
+
+        return render_template("movie_page.html", avg_rating=avg_rating,movie=movie, 
+                            user_rating=user_rating,prediction= prediction, beratement=beratement)#, user_rating=r)
+   
+    #if no user has logged in, return this:
+    return render_template("movie_page.html", avg_rating=avg_rating,movie=movie)
+######################################
     # user=g.user
 
     # r=model.Rating()
     # rating=model.session.query(model.Movie).filter_by(movie_title=movie_title, user_id=user.id).one()
     # r.rating=rating.ratings
 
-    return render_template("movie_page.html", avg_rating=avg_rating,movie=movie)#, user_rating=r)
 
 #should make a check so peope can't add multiple ratings for the same movie
 @app.route("/add_rating")
