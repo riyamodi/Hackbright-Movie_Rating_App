@@ -143,6 +143,7 @@ def movie():
    
     #if no user has logged in, return this:
     return render_template("movie_page.html", avg_rating=avg_rating,movie=movie)
+
 ######################################
     # user=g.user
 
@@ -174,7 +175,35 @@ def add_rating():
         g.user.ratings.append(r)
         model.session.add(r)
         model.session.commit()
-        return redirect("/user")
+        #return redirect("/user")   
+        
+        #redirect them to a page to display the eye's judgement on the rating they just added
+        the_eye= model.session.query(model.User).filter_by(email="theeye@ofjudgement.com").one()
+        eye_rating = model.session.query(model.Rating).filter_by(user_id=the_eye.id, movie_id=r.movie_id).first()
+
+        movie=model.session.query(model.Movie).filter_by(id=r.movie_id).one()
+
+        if not eye_rating:
+            eye_rating = the_eye.predict_rating(movie)
+        else:
+            eye_rating = eye_rating.rating
+
+        effective_rating = r.rating
+
+        difference = abs(eye_rating - effective_rating)
+        print "difference is: ", difference
+
+        messages = ["I suppose you don't have the worst taste possible.",
+                    "Not the worst opinion but not the best.",
+                    "You need to reevaluate your tastes and/or personality.",
+                    "I'm running out of insults, but your rating sucks",
+                    "I regret every decision that I've made to listen to your opinion."]
+
+        beratement = messages[int(difference)]
+
+        return render_template("judgement.html", beratement=beratement)
+
+        #return redirect("/user")
     else:
         return redirect("/")
 
